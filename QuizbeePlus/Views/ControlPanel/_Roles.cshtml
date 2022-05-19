@@ -1,0 +1,173 @@
+﻿@model QuizbeePlus.ViewModels.RolesListingViewModel
+@{
+    ViewBag.Title = Model.PageInfo.PageTitle;
+}
+
+<div class="row">
+    @Html.Partial("_Loader", "rolesLoader")
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-md-12">
+                    <form id="roleSearchForm">
+                        <div class="input-group mb-3">
+                            <input id="searchRoleField" name="search" class="form-control" placeholder="Enter Role Name" value="@Model.searchTerm" required>
+                            <button id="searchRolesButton" type="button" class="form-control btn btn-primary waves-effect waves-light w-md"><i class="fas fa-search mg-r-10"></i>&nbsp;Search</button>
+                            <a data-href="@Url.CPRoles(null, 1, Model.pageSize)" role="button" class="datalinked form-control btn btn-primary waves-effect waves-light w-md hide-phone"><i class="fas fa-redo-alt mg-r-10"></i>&nbsp;Reset</a>
+                            <a data-href="@Url.CPNewRole()" role="button" class="datalinked form-control btn btn-primary waves-effect waves-light w-md hide-phone"><i class="fas fa-plus mg-r-10"></i>&nbsp;Add New Role</a>
+                        </div>
+                        <input type="hidden" name="page" value="1" />
+                        <input type="hidden" name="items" value="@Model.pageSize" />
+                    </form>
+                </div>
+                @if (Model.Roles != null && Model.Roles.Count > 0)
+                {
+                    <div class="col-md-12 table-responsive">
+                        <table class="table table-striped table-bordered m-b-0">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Users</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var role in Model.Roles)
+                                {
+                                  <tr>
+                                      <td class="align-middle">@role.Name</td>
+                                      <td class="align-middle">
+                                          @role.Users.Count
+                                      </td>
+                                      <td class="align-middle wrap-td">
+                                          <div class="input-group">
+                                              <a data-href="@Url.RoleDetails(role.Id)" role="button" class="datalinked btn btn-primary btn-sm"><i class="fas fa-edit mg-r-10"></i>&nbsp;More Details</a>
+                                          </div>
+                                      </td>
+                                  </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    if (Model.Pager != null && Model.Pager.EndPage > 1)
+                    {
+                        <div class="col-md-12 text-center">
+                            <nav>
+                                <ul class="pagination m-b-0">
+                                    @if (Model.Pager.CurrentPage > 1)
+                                    {
+                                      <li class="page-item">
+                                          <a class="datalinked page-link" data-href="@Url.CPRoles(Model.searchTerm, 1, Model.pageSize)" aria-label="First">
+                                              <span aria-hidden="true"><i class="fa fa-angle-double-left"></i></span>
+                                              <span class="sr-only">First</span>
+                                          </a>
+                                      </li>
+                                      <li class="page-item">
+                                          <a class="datalinked page-link" data-href="@Url.CPRoles(Model.searchTerm, Model.Pager.CurrentPage - 1, Model.pageSize)" aria-label="Previous">
+                                              <span aria-hidden="true"><i class="fa fa-angle-left"></i></span>
+                                              <span class="sr-only">Previous</span>
+                                          </a>
+                                      </li>
+                                    }
+                
+                                    @for (var page = Model.Pager.StartPage; page <= Model.Pager.EndPage; page++)
+                                    {
+                                        <li class="page-item @(page == Model.Pager.CurrentPage ? "active" : "")">
+                                            <a class="datalinked page-link" data-href="@Url.CPRoles(Model.searchTerm, page, Model.pageSize)">@page</a>
+                                        </li>
+                                    }
+                
+                                    @if (Model.Pager.CurrentPage < Model.Pager.TotalPages)
+                                    {
+                                        <li class="page-item">
+                                            <a class="datalinked page-link" data-href="@Url.CPRoles(Model.searchTerm, Model.Pager.CurrentPage + 1, Model.pageSize)" aria-label="Next">
+                                                <span aria-hidden="true"><i class="fa fa-angle-right"></i></span>
+                                                <span class="sr-only">Next</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="datalinked page-link" data-href="@Url.CPRoles(Model.searchTerm, Model.Pager.TotalPages, Model.pageSize)" aria-label="Last">
+                                                <span aria-hidden="true"><i class="fa fa-angle-double-right"></i></span>
+                                                <span class="sr-only">Last</span>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </nav>
+                        </div>
+                    }
+                }
+                else
+                {
+                     <div class="col-md-12">
+                         <div class="row">
+                             <div class="col-md-12">
+                                 <div class="m-t-10 alert alert-icon alert-warning" role="alert">
+                                     <i class="mdi mdi-alert"></i>
+                                     Sorry. No Roles Found.
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#rolesTab .datalinked").click(function () {
+            var href = $(this).attr("data-href");
+
+            if (href != undefined) {
+                RolesCall(href);
+            }
+        });
+
+        $("#searchRolesButton").click(function () {
+            var searchVal = $("#searchRoleField").val();
+
+            if (searchVal != "") {
+                href = '@Url.CPRoles()&search=' + searchVal;
+                RolesCall(href);
+            }
+            else {
+                swal({
+                    title: 'Enter value to search',
+                    type: 'warning',
+                    confirmButtonColor: '#4fa7f3'
+                });
+            }
+        });
+
+        $('#roleSearchForm').bind('keypress keydown keyup', function (e) {
+            if (e.keyCode == 13) { e.preventDefault(); }
+        });
+    });
+
+    function RolesCall(url) {
+        $("#rolesLoader").show();
+
+		$.ajax({
+            type: "GET",
+            async: true,
+            url: url,
+        })
+        .done(function(data) {
+            $('#rolesTab').toggle('slide', {
+                direction: 'left'
+            }, 250, function() {
+                $("#rolesTab").html(data);
+                $('#rolesTab').toggle('slide', {
+                    direction: 'right'
+                }, 250);
+            });
+        })
+        .fail(function(XMLHttpRequest, textStatus, errorThrown) {
+            $("#rolesLoader").hide();
+            alert(errorThrown);
+        });
+    }
+</script>

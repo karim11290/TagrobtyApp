@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+	@if (Request.Url.AbsolutePath == Url.Home())
+	{
+		<title>Quizbee - Easily Create And Attempt Quizzes</title>
+	}
+	else
+	{
+		<title>@ViewBag.Title - Quizbee</title>
+	}
+
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<link rel="shortcut icon" href="~/Content/images/favicon.png">
+
+	@Html.Partial("_MetaTags")
+	@Html.Partial("_HeadStylesScripts")
+
+</head>
+<body>
+	@Html.Partial("_TopNav")
+
+	<div class="wrapper">
+		@RenderBody()
+
+		@Html.Partial("_Footer")
+	</div>
+
+	@Html.Partial("_FooterScripts")
+</body>
+</html>

@@ -1,0 +1,129 @@
+﻿@model QuizbeePlus.ViewModels.RoleDetailsViewModel
+
+<div class="row">
+    @Html.Partial("_Loader", "roleLoader")
+    <div class="col-md-12">
+        <div class="panel panel-default panel-fill">
+            <div class="panel-heading">
+                <h3 class="panel-title">Role Info</h3>
+            </div>
+            <div class="panel-body">
+                <form id="RoleForm">
+                    <div class="form-group">
+                        <label for="Name">Role Name</label>
+                        <input type="text" value="@Model.Role.Role.Name" id="Name" name="Name" class="form-control" required="">
+                    </div>
+                    <button class="btn btn-success waves-effect waves-light w-md" id="updateRoleButton" type="button">Update Role Info</button>
+                    <button class="btn btn-danger waves-effect waves-light w-md" id="deleteRoleButton" type="button">Delete Role</button>
+                    <button class="btn btn-primary waves-effect waves-light w-md" id="goBackButton" type="button">Go Back</button>
+
+                    <div id="RoleFormErrorsDiv" style="display:none" class="mt-2 alert alert-icon alert-danger m" role="alert">
+                        <i class="mdi mdi-alert-circle"></i>
+                        <div id="RoleFormErrors"></div>
+                    </div>
+                </form>
+
+                <script>
+                	$(document).ready(function () {
+                        $("#updateRoleButton").click(function () {
+                			$("#RoleFormErrorsDiv").hide();
+
+                            $("#roleLoader").show();
+                			$.ajax({
+                				type: "POST",
+                				async: true,
+                				url: '@Url.UpdateRole(Model.Role.Role.Id)',
+                                data: {
+                                    Name: $("#Name").val(),
+                                }
+                            })
+                			.done(function (data) {
+                                $("#roleLoader").hide();
+                				if (data.Success)
+                				{
+                                    swal({
+                                        title: 'Role Details Updated',
+                                        type: 'success',
+                                        confirmButtonColor: '#4fa7f3'
+                                    });
+                				}
+                				else
+                                {
+                					$("#RoleFormErrors").html(data.Errors);
+                					$("#RoleFormErrorsDiv").slideDown();
+                					console.log(data.Errors);
+                				}
+                            })
+                			.fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                                $("#roleLoader").hide();
+                				$("#RoleFormErrors").html(errorThrown);
+                				$("#RoleFormErrorsDiv").slideDown();
+                				console.log(errorThrown);
+                            });
+                        });
+
+                        $("#deleteRoleButton").click(function () {
+                			$("#RoleFormErrorsDiv").hide();
+
+                            $("#roleLoader").show();
+                			$.ajax({
+                				type: "POST",
+                				async: true,
+                				url: '@Url.DeleteRole(Model.Role.Role.Id)'
+                            })
+                			.done(function (data) {
+                                $("#roleLoader").hide();
+                				if (data.Success)
+                				{
+                                    swal({
+                                        title: 'Role Deleted',
+                                        type: 'success',
+                                        confirmButtonColor: '#4fa7f3'
+                                    }).then(function () {
+                                        $("#goBackButton").click();
+                                    });
+                				}
+                				else
+                                {
+                					$("#RoleFormErrors").html(data.Errors);
+                					$("#RoleFormErrorsDiv").slideDown();
+                					console.log(data.Errors);
+                				}
+                            })
+                			.fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                                $("#roleLoader").hide();
+                				$("#RoleFormErrors").html(errorThrown);
+                				$("#RoleFormErrorsDiv").slideDown();
+                				console.log(errorThrown);
+                            });
+                        });
+
+                        $("#goBackButton").click(function () {
+                            $("#roleLoader").show();
+
+                            $.ajax({
+                                type: "GET",
+                                async: true,
+                                url: '@Url.CPRoles()',
+                            })
+                            .done(function (data) {
+                                $('#rolesTab').toggle('slide', {
+                                    direction: 'left'
+                                }, 250, function () {
+                                    $("#rolesTab").html(data);
+                                    $('#rolesTab').toggle('slide', {
+                                        direction: 'right'
+                                    }, 250);
+                                });
+                            })
+                            .fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                                $("#roleLoader").hide();
+                                alert(errorThrown);
+                            });
+                        });
+                	});
+                </script>
+            </div>
+        </div>
+    </div>
+</div>

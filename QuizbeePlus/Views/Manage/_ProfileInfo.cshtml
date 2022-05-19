@@ -1,0 +1,171 @@
+﻿@model QuizbeePlus.ViewModels.ProfileViewModel
+
+<link href="~/Content/plugins/sweet-alert2/sweetalert2.min.css" rel="stylesheet" />
+
+<form id="EmailForm">
+    <div class="form-group">
+        <label for="UserName">Photo</label>
+        <input type="file" name="Photo" id="Photo" class="form-control" accept=".png,.jpg,.jpeg,.gif,.tif" />
+        <input type="hidden" id="PhotoURL" />
+    </div>
+    <div class="form-group">
+        <label for="UserName">User Name</label>
+        <input type="text" value="@Model.UserName" id="UserName" name="UserName" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="Email">Email</label>
+        <input type="email" value="@Model.Email" id="Email" name="Email" class="form-control" required>
+    </div>
+    <button class="btn btn-primary waves-effect waves-light w-md" id="updateEmailForm" type="button">Update</button>
+
+    <div id="EmailFormErrorsDiv" style="display:none" class="mt-2 alert alert-icon alert-danger m" role="alert">
+        <i class="mdi mdi-alert-circle"></i>
+        <div id="EmailFormErrors"></div>
+    </div>
+</form>
+
+<hr />
+<h5 class="font-14 mb-3 text-uppercase">Change Password</h5>
+<form id="PasswordForm">
+    <div class="form-group">
+        <label for="OldPassword">Old Password</label>
+        <input type="password" id="OldPassword" name="OldPassword" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="NewPassword">New Password</label>
+        <input type="password" id="NewPassword" name="NewPassword" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="RePassword">Confirm Password</label>
+        <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="form-control" required>
+    </div>
+    <button class="btn btn-primary waves-effect waves-light w-md" id="updatePasswordForm" type="button">Update Password</button>
+
+    <div id="PasswordFormErrorsDiv" style="display:none" class="mt-2 alert alert-icon alert-danger" role="alert">
+        <i class="mdi mdi-alert-circle"></i>
+        <div id="PasswordFormErrors"></div>
+    </div>
+</form>
+
+<script src="~/Content/plugins/sweet-alert2/sweetalert2.min.js"></script>
+<script>
+	$(document).ready(function () {
+		$("#updateEmailForm").click(function () {
+			$("#EmailFormErrorsDiv").hide();
+
+            $("#profileLoader").show();
+			$.ajax({
+				type: "POST",
+				async: true,
+				url: '@Url.UpdateInfo()',
+				data: {
+					UserName: $("#UserName").val(),
+					Email: $("#Email").val(),
+					Photo: $("#PhotoURL").val()
+                }
+            })
+			.done(function (data) {
+				if (data.Success)
+				{
+					swal({
+						title: 'Profile Updated',
+						type: 'success',
+						confirmButtonColor: '#4fa7f3'
+					}).then(function () {
+						window.location.reload();
+					});
+				}
+				else
+                {
+                    $("#profileLoader").hide();
+					$("#EmailFormErrors").html(data.Errors);
+					$("#EmailFormErrorsDiv").slideDown();
+					console.log(data.Errors);
+				}
+            })
+			.fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                $("#profileLoader").hide();
+				$("#EmailFormErrors").html(errorThrown);
+				$("#EmailFormErrorsDiv").slideDown();
+				console.log(errorThrown);
+            });
+		});
+
+        $("#updatePasswordForm").click(function () {
+            $("#profileLoader").show();
+			$("#PasswordFormErrorsDiv").hide();
+
+			$.ajax({
+				type: "POST",
+				async: true,
+                url: '@Url.UpdatePassword()',
+				data: {
+					OldPassword: $("#OldPassword").val(),
+					NewPassword: $("#NewPassword").val(),
+					ConfirmPassword: $("#ConfirmPassword").val()
+                }
+            })
+			.done(function (data) {
+				if (data.Success)
+				{
+					swal({
+						title: 'Password Updated',
+						type: 'success',
+						confirmButtonColor: '#4fa7f3'
+					}).then(function () {
+						window.location.reload();
+					});
+				}
+				else
+                {
+                    $("#profileLoader").hide();
+					$("#PasswordFormErrors").html(data.Errors);
+					$("#PasswordFormErrorsDiv").slideDown();
+					console.log(data.Errors);
+				}
+            })
+			.fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                $("#profileLoader").hide();
+				$("#PasswordFormErrors").html(errorThrown);
+				$("#PasswordFormErrorsDiv").slideDown();
+				console.log(errorThrown);
+            });
+		});
+
+		$("#Photo").change(function () {
+			var formData = new FormData();
+			var totalFiles = document.getElementById("Photo").files.length;
+			for (var i = 0; i < totalFiles; i++) {
+				var file = document.getElementById("Photo").files[i];
+				formData.append("Photo", file);
+			}
+
+            $("#profileLoader").show();
+
+			$.ajax({
+				type: "POST",
+				url: '@Url.UploadImage()',
+				data: formData,
+				dataType: 'json',
+				contentType: false,
+				processData: false
+            }).done(function (data) {
+                $("#profileLoader").hide();
+				if (data.Success) {
+					$("#PhotoURL").val(data.Image);
+                    $("#userAvatar").attr('src', data.ImageURL);
+				}
+				else {
+					$("#EmailFormErrors").html(data.Message);
+					$("#EmailFormErrorsDiv").slideDown();
+					console.log(data.Message);
+				}
+                }).fail(function (xhr, status, errorThrown) {
+                $("#profileLoader").hide();
+				$("#EmailFormErrors").html(errorThrown);
+				$("#EmailFormErrorsDiv").slideDown();
+				console.log(errorThrown);
+			})
+		});
+	});
+</script>

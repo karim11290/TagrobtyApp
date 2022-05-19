@@ -1,0 +1,47 @@
+﻿@model QuizbeePlus.ViewModels.ControlPanelViewModel
+@{
+    ViewBag.Title = Model.PageInfo.PageTitle;
+}
+
+<link href="~/Content/plugins/sweet-alert2/sweetalert2.min.css" rel="stylesheet" />
+<script src="/Content/plugins/sweet-alert2/sweetalert2.min.js"></script>
+
+<div class="container-fluid">
+    <div class="">
+        <ul class="nav nav-tabs tabs-bordered">
+            <li class="nav-item">
+                <a href="#usersTab" data-toggle="tab" aria-expanded="false" class="nav-link active">
+                    Users
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#rolesTab" data-toggle="tab" aria-expanded="false" class="nav-link">
+                    Roles
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#quizzesTab" data-toggle="tab" aria-expanded="false" class="nav-link">
+                    Quizzes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#attemptsTab" data-toggle="tab" aria-expanded="true" class="nav-link">
+                    Quiz Attempts
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active" id="usersTab">
+                @{
+                    Html.RenderAction("Users");
+                }
+            </div>
+            <div class="tab-pane" id="rolesTab">
+                @{
+                    Html.RenderAction("Roles");
+                }
+            </div>
+    
+        </div>
+    </div>
+</div>

@@ -1,0 +1,62 @@
+﻿<header id="topnav">
+	<div class="topbar-main">
+		<div class="container-fluid">
+			<div class="logo">
+				<a href="@Url.Home()" class="logo">
+					<span class="logo-small"><i class="fas fa-tasks"></i> Quizbee</span>
+					<span class="logo-large"><i class="fas fa-tasks"></i> Quizbee</span>
+				</a>
+			</div>
+			<div class="navbar-custom">
+				<div id="navigation">
+					<ul class="navigation-menu">
+						<li>
+							<a href="@Url.Home()">
+								<span><i class="fas fa-home"></i></span>&nbsp;<span>Home</span>
+							</a>
+						</li>
+						<li class="has-submenu">
+						
+							<ul class="submenu">
+								<li>
+									<a href="">
+										<i class="fa fa-plus"></i>&nbsp;&nbsp;Create New 
+									</a>
+								</li>
+							</ul>
+						</li>
+					
+					</ul>
+				</div>
+			</div>
+			<div class="menu-extras topbar-custom">
+				<ul class="list-unstyled topbar-right-menu float-right mb-0">
+					<li class="menu-item">
+						<a class="navbar-toggle nav-link">
+							<div class="lines">
+								<span></span>
+								<span></span>
+								<span></span>
+							</div>
+						</a>
+					</li>
+
+					@Html.Partial("_UserMenu")
+				</ul>
+			</div>
+			<div class="clearfix"></div>
+		</div>
+	</div>
+</header>
+
+<form method="post" action="@Url.Logout()" id="logOutForm" style="display:none">
+	@Html.AntiForgeryToken()
+</form>
+
+<script>
+	$(document).ready(function () {
+		$("#logout").click(function () {
+			$("#logOutForm").submit();
+		});
+	});
+</script>

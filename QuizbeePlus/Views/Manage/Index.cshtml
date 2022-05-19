@@ -1,0 +1,75 @@
+﻿@model QuizbeePlus.ViewModels.ProfileViewModel
+@{
+    ViewBag.Title = Model.PageInfo.PageTitle;
+}
+
+<div class="wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="p-0 text-center">
+                    <div class="member-card">
+                        <div class="thumb-xl member-thumb m-b-10 center-page">
+                            <img style="width:125px;height:125px" id="userAvatar" src="@Url.MyPhoto()" class="rounded-circle img-thumbnail" alt="profile-image">
+                            <i class="mdi mdi-star-circle member-star text-success"></i>
+                        </div>
+                        <div class="">
+                            <h5 class="m-b-5 mt-3">@Model.User.UserName</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="m-t-30">
+            <ul class="nav nav-tabs tabs-bordered">
+                <li class="nav-item">
+                    <a href="#profileTab" data-toggle="tab" aria-expanded="false" class="nav-link active">
+                        My Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#resultsTab" data-toggle="tab" aria-expanded="true" class="nav-link">
+                        My Quiz Results
+                    </a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane active" id="profileTab">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="panel panel-default panel-fill">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Personal Information</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="m-b-20">
+                                        <strong>User Name</strong>
+                                        <br>
+                                        <p class="text-muted">@Model.User.UserName</p>
+                                    </div>
+                                    <div class="m-b-20">
+                                        <strong>Email</strong>
+                                        <br>
+                                        <p class="text-muted">@Model.User.Email</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="panel panel-default panel-fill">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Update Info</h3>
+                                </div>
+                                <div class="panel-body">
+                                    @Html.Partial("_Loader", "profileLoader")
+                                    @Html.Partial("_ProfileInfo", Model)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+          
+            </div>
+        </div>
+    </div>
+</div>

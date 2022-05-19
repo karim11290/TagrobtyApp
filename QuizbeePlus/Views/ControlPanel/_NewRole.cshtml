@@ -1,0 +1,93 @@
+﻿
+@model NewRoleViewModel
+
+<div class="row">
+    @Html.Partial("_Loader", "newRoleLoader")
+    <div class="col-md-12">
+        <div class="panel panel-default panel-fill">
+            <div class="panel-heading">
+                <h3 class="panel-title">New Role</h3>
+            </div>
+            <div class="panel-body">
+                <form id="RoleForm">
+                    <div class="form-group">
+                        <label for="Name">Role Name</label>
+                        <input type="text" value="@Model.Name" id="Name" name="Name" class="form-control" required="">
+                    </div>
+                    <button class="btn btn-success waves-effect waves-light w-md" id="newRoleButton" type="button">Add New Role</button>
+                    <button class="btn btn-primary waves-effect waves-light w-md" id="goBackButton" type="button">Go Back</button>
+
+                    <div id="RoleFormErrorsDiv" style="display:none" class="mt-2 alert alert-icon alert-danger m" role="alert">
+                        <i class="mdi mdi-alert-circle"></i>
+                        <div id="RoleFormErrors"></div>
+                    </div>
+                </form>
+
+                <script>
+                	$(document).ready(function () {
+                        $("#newRoleButton").click(function () {
+                			$("#RoleFormErrorsDiv").hide();
+
+                            $("#newRoleLoader").show();
+                			$.ajax({
+                				type: "POST",
+                				async: true,
+                				url: '@Url.CPNewRole()',
+                                data: {
+                                    Name: $("#Name").val(),
+                                }
+                            })
+                			.done(function (data) {
+                                $("#newRoleLoader").hide();
+                				if (data.Success)
+                				{
+                                    swal({
+                                        title: 'New Role Added',
+                                        type: 'success',
+                                        confirmButtonColor: '#4fa7f3'
+                                    });
+                				}
+                				else
+                                {
+                					$("#RoleFormErrors").html(data.Errors);
+                					$("#RoleFormErrorsDiv").slideDown();
+                					console.log(data.Errors);
+                				}
+                            })
+                			.fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                                $("#newRoleLoader").hide();
+                				$("#RoleFormErrors").html(errorThrown);
+                				$("#RoleFormErrorsDiv").slideDown();
+                				console.log(errorThrown);
+                            });
+                        });
+                               
+                        $("#goBackButton").click(function () {
+                            $("#newRoleLoader").show();
+
+                            $.ajax({
+                                type: "GET",
+                                async: true,
+                                url: '@Url.CPRoles()',
+                            })
+                            .done(function (data) {
+                                $('#rolesTab').toggle('slide', {
+                                    direction: 'left'
+                                }, 250, function () {
+                                    $("#rolesTab").html(data);
+                                    $('#rolesTab').toggle('slide', {
+                                        direction: 'right'
+                                    }, 250);
+                                });
+                            })
+                            .fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                                $("#newRoleLoader").hide();
+                                alert(errorThrown);
+                            });
+                        });
+                	});
+                </script>
+            </div>
+        </div>
+    </div>
+</div>

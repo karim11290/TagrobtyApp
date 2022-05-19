@@ -1,0 +1,13 @@
+﻿@model string
+
+@{
+    var controlID = !string.IsNullOrEmpty(Model) ? string.Format("{0}", Model) : Variables.RandomString;
+}
+
+<div id="@controlID" class="col-md-12 m-2 qloader-holder" style="display:none">
+    <div class="center-page qloader"></div>
+</div>
+
+<script>
+    $("#@controlID").parents(".row").first().addClass("rel-pos");
+</script>

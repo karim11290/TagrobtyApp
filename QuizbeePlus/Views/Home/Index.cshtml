@@ -1,0 +1,63 @@
+﻿@model QuizbeePlus.ViewModels.HomeViewModel
+@{
+
+
+    var shareableLink = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, Url.Home());
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="p-20">
+                <div class="row">
+                    <div class="mx-auto col-sm-8">
+                        <div class="text-center">
+                            <h4 class="font-600"></h4>
+                            <p class="text-muted">
+
+                            </p>
+                            <a href="" role="button" class="btn btn-success m-t-10">
+                                <i class="fas fa-plus mg-r-10"></i>&nbsp;Create New Quiz
+                            </a>
+                            <a role="button" class="btn btn-facebook m-t-10" href="http://www.facebook.com/sharer.php?u=@shareableLink" target="_blank">
+                                <span class="text-white"><i class="fab fa-facebook-square"></i>&nbsp;&nbsp;Connect With Us</span>
+                            </a>
+                            <a role="button" class="btn btn-twitter m-t-10" href="http://twitter.com/share?text=Attempt%20Quizzes%20here&url=@shareableLink" target="_blank">
+                                <span class="text-white"><i class="fab fa-twitter-square"></i>&nbsp;&nbsp;Tweet To Us</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<table class="table table-bordered">
+    <thead>
+        <tr class="success">
+            <th>
+                Social Logins
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <input type="button" id="btnGoogleLogin"
+                       value="Login with Google" class="btn btn-success" />
+            </td>
+        </tr>
+    </tbody>
+</table>
+<script>
+
+    $('#btnGoogleLogin').click(function () {
+
+        window.location.href = "/api/AccountAPI/ExternalLogin?provider=Google&response_type=token&client_id=self&redirect_uri=https%3A%2F%2Flocalhost%3A44394%2F&state=ubyLkob0kxG5xMSJuEiFYe3vkMbU21_ryqCnr23MUFU1";
+    });
+</script>
+
+

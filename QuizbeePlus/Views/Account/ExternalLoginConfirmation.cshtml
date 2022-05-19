@@ -1,0 +1,54 @@
+﻿@model QuizbeePlus.ViewModels.ExternalLoginConfirmationViewModel
+@{
+    ViewBag.Title = "Register";
+}
+
+<section>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="wrapper-page">
+                    <div class="m-t-40 card-box">
+                        <div class="text-center">
+                            <h4 class="text-uppercase font-bold m-b-0">Register</h4>
+                        </div>
+                        <div class="account-content">
+                            @using (Html.BeginForm("ExternalLoginConfirmation", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <p class="text-info">
+                                    You've successfully authenticated with <strong>@ViewBag.LoginProvider</strong>.
+                                    Please verify below information and click the Register button to finish
+                                    logging in.
+                                </p>
+                                <div class="form-group m-b-20">
+                                    <div class="col-xs-12">
+                                        <label for="Email">Email</label>
+                                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group m-b-20">
+                                    <div class="col-xs-12">
+                                        <label for="Username">Username</label>
+                                        @Html.TextBoxFor(m => m.Username, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group account-btn text-center m-t-10">
+                                    <div class="col-xs-12">
+                                        <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+                                    </div>
+                                </div>
+                            }
+                            <p class="text-center">
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            </p>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

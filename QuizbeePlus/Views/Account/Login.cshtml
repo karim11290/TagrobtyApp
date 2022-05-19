@@ -1,0 +1,71 @@
+﻿@model QuizbeePlus.ViewModels.LoginViewModel
+@{
+    ViewBag.Title = "Login";
+}
+
+<section>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+
+                <div class="wrapper-page">
+
+                    <div class="m-t-40 card-box">
+                        <div class="text-center">
+                            <h4 class="text-uppercase font-bold m-b-0">Login</h4>
+                        </div>
+                        <div class="account-content">
+                            <form class="form-horizontal" method="post">
+                                @Html.AntiForgeryToken()
+                                <div class="form-group m-b-20">
+                                    <div class="col-xs-12">
+                                        <label for="UserName">Username</label>
+                                        <input type="text" name="Username" class="form-control" placeholder="Enter your User Name" value="@Model.Username">
+                                        @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group m-b-20">
+                                    <div class="col-xs-12">
+                                        @*<a href="pages-forget-password.html" class="text-muted pull-right font-14">Forgot your password?</a>*@
+                                        <label for="password">Password</label>
+                                        <input type="password" name="Password" class="form-control" placeholder="Enter Password" value="@Model.Password">
+                                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group m-b-30">
+                                    <div class="col-xs-12">
+                                        <div class="checkbox checkbox-primary">
+                                            @Html.CheckBoxFor(m => m.RememberMe)
+                                            <label for="RememberMe">
+                                                Remember me
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group account-btn text-center m-t-10">
+                                    <div class="col-xs-12">
+                                        <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
+                                    </div>
+                                </div>
+                                <hr />
+                                <p class="text-center">
+                                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                </p>
+                            </form>
+                            <div class="clearfix"></div>
+                        </div>
+                        @Html.Partial("_ExternalLoginsListPartial", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
+                    </div>
+                    <div class="row m-t-50">
+                        <div class="col-sm-12 text-center">
+                            <p class="text-muted">Don't have an account? <a href="@Url.Register()" class="text-dark m-l-5">Register</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,38 @@
+﻿@model QuizbeePlus.ViewModels.ExternalLoginListViewModel
+@using Microsoft.Owin.Security
+
+@{
+    var loginProviders = Context.GetOwinContext().Authentication.GetExternalAuthenticationTypes();
+}
+
+@if (loginProviders != null && loginProviders.Count() > 0)
+{
+    var facebookProvider = (AuthenticationDescription)loginProviders.Where(x => x.AuthenticationType.Equals("Facebook")).FirstOrDefault();
+    var googleProvider = (AuthenticationDescription)loginProviders.Where(x => x.AuthenticationType.Equals("Google")).FirstOrDefault();
+
+    <div class="text-center">
+        <h6 class="text-uppercase font-bold m-b-0">Use another service to log in.</h6>
+    </div>
+
+    using (Html.BeginForm("ExternalLogin", "Account", new { ReturnUrl = Model.ReturnUrl }))
+    {
+        @Html.AntiForgeryToken()
+        <div id="socialLoginList">
+            <p class="text-center">
+                @if (facebookProvider != null)
+                {
+                <button type="submit" class="btn btn-default" id="@facebookProvider.AuthenticationType" name="provider" value="@facebookProvider.AuthenticationType" title="Log in using your @facebookProvider.Caption account">
+                    <img style="width:50px;height:50px" src="~/Content/images/system/facebook.PNG" class="img-thumbnail" alt="Facebook Login">
+                </button>
+                }
+
+                @if (googleProvider != null)
+                {
+                    <button type="submit" class="btn btn-default" id="@googleProvider.AuthenticationType" name="provider" value="@googleProvider.AuthenticationType" title="Log in using your @googleProvider.Caption account">
+                        <img style="width:50px;height:50px" src="~/Content/images/system/googleplus.PNG" class="img-thumbnail" alt="Google Login">
+                    </button>
+                }
+            </p>
+        </div>
+    }
+}
