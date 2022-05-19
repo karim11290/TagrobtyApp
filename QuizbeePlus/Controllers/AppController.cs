@@ -34,23 +34,30 @@ namespace QuizbeePlus.Controllers
     [RoutePrefix("api/App")]
     public class AppController : ApiController
     {
-        private const string LocalLoginProvider = "Local";
-        
+        #region Constructors
+        public AppController(UserManager<QuizbeeUser> AppUser)
+        {
+            this.AppUser = AppUser;
 
-        public UserManager<QuizbeeUser> AppUser { get; private set; }
-        private QuizbeeUserManager _userManager;
+        }
         public AppController()
-            : this(new UserManager<QuizbeeUser>(new UserStore<QuizbeeUser>(new QuizbeeContext())))
+          : this(new UserManager<QuizbeeUser>(new UserStore<QuizbeeUser>(new QuizbeeContext())))
         {
         }
-        public ISecureDataFormat<AuthenticationTicket> AccessTokenFormat { get; private set; }
+
         public AppController(QuizbeeUserManager userManager,
         ISecureDataFormat<AuthenticationTicket> accessTokenFormat)
         {
             UserManager = userManager;
             AccessTokenFormat = accessTokenFormat;
         }
+        #endregion
+        #region  Parameters
+        public UserManager<QuizbeeUser> AppUser { get; private set; }
+        private QuizbeeUserManager _userManager;
 
+        public ISecureDataFormat<AuthenticationTicket> AccessTokenFormat { get; private set; }
+        private const string LocalLoginProvider = "Local";
         public QuizbeeUserManager UserManager
         {
             get
@@ -62,13 +69,212 @@ namespace QuizbeePlus.Controllers
                 _userManager = value;
             }
         }
-
-        public AppController(UserManager<QuizbeeUser> AppUser)
+        #endregion
+        #region User Identity APIS
+        // POST api/App/SignUp
+        [HttpPost]
+        [Route("SignUp")]
+        public dynamic SignUp(RegisterRequestAPI RegisterRequestAPI)
         {
-            this.AppUser = AppUser;
+            ReponseAPI reponseAPI = new ReponseAPI();
+
+            if (RegisterRequestAPI.APIKey == null)
+            {
+                reponseAPI = new ReponseAPI()
+                {
+                    Status = "403",
+                    Error = "API key is missing.",
+
+                };
+                return reponseAPI;
+            }
+            if (RegisterRequestAPI.APIKey != "APIKey")
+            {
+                reponseAPI = new ReponseAPI()
+                {
+                    Status = "401",
+                    Error = "Invalid API key.",
+
+                };
+                return reponseAPI;
+            }
+            if (RegisterRequestAPI.UserName == null)
+            {
+                reponseAPI = new ReponseAPI()
+                {
+                    Status = "400",
+                    Error = "Please provide username.",
+
+                };
+                return reponseAPI;
+            }
+            if (RegisterRequestAPI.Password == null)
+            {
+                reponseAPI = new ReponseAPI()
+                {
+                    Status = "400",
+                    Error = "Please provide password.",
+
+                };
+                return reponseAPI;
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(RegisterRequestAPI.UserName))
+                {
+                    RegisterRequestAPI.UserName = RegisterRequestAPI.UserName.Trim();
+                }
+                if (!string.IsNullOrWhiteSpace(RegisterRequestAPI.Password))
+                {
+                    RegisterRequestAPI.Password = RegisterRequestAPI.Password.Trim();
+                }
+                using (var context = new QuizbeeContext())
+                {
+                    QuizbeeUser QuizbeeUser = context.Users.Where(a => a.UserName == RegisterRequestAPI.UserName && a.Password == RegisterRequestAPI.Password).FirstOrDefault();
+
+                    if (QuizbeeUser != null)
+                    {
+                        reponseAPI = new ReponseAPI()
+                        {
+                            Status = "500",
+                            AuthKey = "this user is already Found",
+
+                        };
+                        return reponseAPI;
+                    }
+                    else
+                    {
+
+                        var user = new QuizbeeUser { UserName = RegisterRequestAPI.UserName, Email = RegisterRequestAPI.Email, RegisteredOn = DateTime.Now, Password = RegisterRequestAPI.Password };
+                        AppUser.Create(user, RegisterRequestAPI.Password);
+                        AppUser.AddToRole(user.Id, "User");
+
+                        reponseAPI = new ReponseAPI()
+                        {
+                            Status = "201",
+
+
+                        };
+                        return reponseAPI;
+                    }
+                }
+            }
 
         }
-        #region User Identity APIS
+
+        // POST api/App/Login
+        [HttpPost]
+        [Route("Login")]
+        public ReponseAPI Login(LoginReuestAPI LoginReuestAPI)
+        {
+            ReponseAPI reponseAPI = new ReponseAPI();
+
+            if (LoginReuestAPI.APIKey == null)
+            {
+                reponseAPI = new ReponseAPI()
+                {
+                    Status = "403",
+                    Error = "API key is missing.",
+
+                };
+                return reponseAPI;
+            }
+            if (LoginReuestAPI.APIKey != "APIKey")
+            {
+                reponseAPI = new ReponseAPI()
+                {
+                    Status = "401",
+                    Error = "Invalid API key.",
+
+                };
+                return reponseAPI;
+            }
+            if (LoginReuestAPI.UserName == null)
+            {
+                reponseAPI = new ReponseAPI()
+                {
+                    Status = "400",
+                    Error = "Please provide username.",
+
+                };
+                return reponseAPI;
+            }
+            if (LoginReuestAPI.Password == null)
+            {
+                reponseAPI = new ReponseAPI()
+                {
+                    Status = "400",
+                    Error = "Please provide password.",
+
+                };
+                return reponseAPI;
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(LoginReuestAPI.UserName))
+                {
+                    LoginReuestAPI.UserName = LoginReuestAPI.UserName.Trim();
+                }
+                if (!string.IsNullOrWhiteSpace(LoginReuestAPI.Password))
+                {
+                    LoginReuestAPI.Password = LoginReuestAPI.Password.Trim();
+                }
+                using (var context = new QuizbeeContext())
+                {
+                    QuizbeeUser QuizbeeUser = context.Users.Where(a => a.UserName == LoginReuestAPI.UserName && a.Password == LoginReuestAPI.Password).FirstOrDefault();
+                    if (QuizbeeUser != null)
+                    {
+                        var TokenString = UsersService.Instance.GetToken(LoginReuestAPI.UserName, LoginReuestAPI.Password);
+
+
+
+                        reponseAPI = new ReponseAPI()
+                        {
+                            Status = "201",
+                            AuthKey = TokenString,
+
+                        };
+                        return reponseAPI;
+                    }
+                    else
+                    {
+                        reponseAPI = new ReponseAPI()
+                        {
+                            Status = "500",
+                            Error = "Something went wrong. Please try again later.",
+
+                        };
+                        return reponseAPI;
+                    }
+                }
+            }
+
+        }
+
+        // POST api/App/PasswordRecovery
+        [HttpPost]
+        [Route("PasswordRecovery")]
+        public dynamic PasswordRecovery(string Email)
+        {
+            Email = Email.Trim();
+            var currentuser = AppUser.FindByEmail(Email);
+
+            if (currentuser != null)
+            {
+                using (var context = new QuizbeeContext())
+                {
+                    QuizbeeUser UserObj = context.Users.Where(a => a.Email == Email).FirstOrDefault();
+                    if (UserObj != null)
+                    {
+                        BaseLogics.PasswordForgotEmailSend(UserObj);
+                        return "Password Reset Successfully. Please Check Email...!";
+                    }
+                }
+
+            }
+            return "Please Enter Correct Email Address.";
+        }
+
         // POST api/App/Logout
         [Route("Logout")]
         public IHttpActionResult Logout()
@@ -360,108 +566,20 @@ namespace QuizbeePlus.Controllers
             base.Dispose(disposing);
         }
 
-        # endregion
-
-
-        [HttpPost]
-        [Route("SignUp")]
-        public dynamic SignUp(RegisterRequestAPI RegisterRequestAPI)
-        {
-            ReponseAPI reponseAPI = new ReponseAPI();
-
-            if (RegisterRequestAPI.APIKey == null)
-            {
-                reponseAPI = new ReponseAPI()
-                {
-                    Status = "403",
-                    Error = "API key is missing.",
-
-                };
-                return reponseAPI;
-            }
-            if (RegisterRequestAPI.APIKey != "APIKey")
-            {
-                reponseAPI = new ReponseAPI()
-                {
-                    Status = "401",
-                    Error = "Invalid API key.",
-
-                };
-                return reponseAPI;
-            }
-            if (RegisterRequestAPI.UserName == null)
-            {
-                reponseAPI = new ReponseAPI()
-                {
-                    Status = "400",
-                    Error = "Please provide username.",
-
-                };
-                return reponseAPI;
-            }
-            if (RegisterRequestAPI.Password == null)
-            {
-                reponseAPI = new ReponseAPI()
-                {
-                    Status = "400",
-                    Error = "Please provide password.",
-
-                };
-                return reponseAPI;
-            }
-            else
-            {
-                if (!string.IsNullOrWhiteSpace(RegisterRequestAPI.UserName))
-                {
-                    RegisterRequestAPI.UserName = RegisterRequestAPI.UserName.Trim();
-                }
-                if (!string.IsNullOrWhiteSpace(RegisterRequestAPI.Password))
-                {
-                    RegisterRequestAPI.Password = RegisterRequestAPI.Password.Trim();
-                }
-                using (var context = new QuizbeeContext())
-                {
-                    QuizbeeUser QuizbeeUser = context.Users.Where(a => a.UserName == RegisterRequestAPI.UserName && a.Password==RegisterRequestAPI.Password).FirstOrDefault();
-
-                    if (QuizbeeUser != null)
-                    {
-                        reponseAPI = new ReponseAPI()
-                        {
-                            Status = "500",
-                            AuthKey = "this user is already Found",
-
-                        };
-                        return reponseAPI;
-                    }
-                    else
-                    {
-
-                        var user = new QuizbeeUser { UserName = RegisterRequestAPI.UserName, Email = RegisterRequestAPI.Email, RegisteredOn = DateTime.Now,Password=RegisterRequestAPI.Password };
-                        AppUser.Create(user, RegisterRequestAPI.Password);
-                        AppUser.AddToRole(user.Id, "User");
-
-                        reponseAPI = new ReponseAPI()
-                        {
-                            Status = "201",
-                           
-
-                        };
-                        return reponseAPI;
-                    }
-                }
-            }
-
-        }
-
-    
+        #endregion
+        #region Business
         [HttpPost]
         [Route("filter")]
-
         public dynamic filter()
         {
             //return true;
             return new string[] { "You are successfully Authenticated to Access the Service" };
         }
+        #endregion
+        #region Area
+
+        #endregion
+        #region Category
 
         [HttpGet]
         [Route("GetCategories")]
@@ -472,122 +590,32 @@ namespace QuizbeePlus.Controllers
                 return context.Categories.ToList();
             }
         }
-        [HttpPost]
-        [Route("Login")]
-        public ReponseAPI Login(LoginReuestAPI LoginReuestAPI)
-        {
-            ReponseAPI reponseAPI = new ReponseAPI();
 
-            if (LoginReuestAPI.APIKey == null)
-            {
-                reponseAPI = new ReponseAPI()
-                {
-                    Status = "403",
-                    Error = "API key is missing.",
+        #endregion
+        #region Amenity
 
-                };
-                return reponseAPI;
-            }
-            if (LoginReuestAPI.APIKey != "APIKey")
-            {
-                reponseAPI = new ReponseAPI()
-                {
-                    Status = "401",
-                    Error = "Invalid API key.",
+        #endregion
+        #region BusinessAmenities
 
-                };
-                return reponseAPI;
-            }
-            if (LoginReuestAPI.UserName == null)
-            {
-                reponseAPI = new ReponseAPI()
-                {
-                    Status = "400",
-                    Error = "Please provide username.",
+        #endregion
+        #region City
 
-                };
-                return reponseAPI;
-            }
-            if (LoginReuestAPI.Password == null)
-            {
-                reponseAPI = new ReponseAPI()
-                {
-                    Status = "400",
-                    Error = "Please provide password.",
+        #endregion
+        #region Comment
 
-                };
-                return reponseAPI;
-            }
-            else
-            {
-                if (!string.IsNullOrWhiteSpace(LoginReuestAPI.UserName))
-                {
-                    LoginReuestAPI.UserName = LoginReuestAPI.UserName.Trim();
-                }
-                if (!string.IsNullOrWhiteSpace(LoginReuestAPI.Password))
-                {
-                    LoginReuestAPI.Password = LoginReuestAPI.Password.Trim();
-                }
-                using (var context = new QuizbeeContext())
-                {
-                    QuizbeeUser QuizbeeUser = context.Users.Where(a => a.UserName == LoginReuestAPI.UserName && a.Password == LoginReuestAPI.Password).FirstOrDefault();
-                    if (QuizbeeUser != null)
-                    {
-                        var TokenString = UsersService.Instance.GetToken(LoginReuestAPI.UserName, LoginReuestAPI.Password);
+        #endregion
+        #region Country
 
-                        
+        #endregion
+        #region Day
 
-                        reponseAPI = new ReponseAPI()
-                        {
-                            Status = "201",
-                            AuthKey = TokenString,
+        #endregion
+        #region Image
 
-                        };
-                        return reponseAPI;
-                    }
-                    else
-                    {
-                        reponseAPI = new ReponseAPI()
-                        {
-                            Status = "500",
-                            Error = "Something went wrong. Please try again later.",
+        #endregion
+        #region OpenningHours
 
-                        };
-                        return reponseAPI;
-                    }
-                }
-            }
-
-        }
-
-
-
-        [HttpPost]
-        [Route("PasswordRecovery")]
-
-        public dynamic PasswordRecovery(string Email)
-        {
-            Email = Email.Trim();
-            var currentuser = AppUser.FindByEmail(Email);
-
-            if (currentuser != null)
-            {
-                using (var context = new QuizbeeContext())
-                {
-                    QuizbeeUser UserObj = context.Users.Where(a => a.Email == Email).FirstOrDefault();
-                    if (UserObj != null)
-                    {
-                        BaseLogics.PasswordForgotEmailSend(UserObj);
-                        return "Password Reset Successfully. Please Check Email...!";
-                    }
-                }
-
-            }
-            return "Please Enter Correct Email Address.";
-        }
-
-
-      
+        #endregion
 
 
 
